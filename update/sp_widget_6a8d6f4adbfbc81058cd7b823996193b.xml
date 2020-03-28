@@ -2,15 +2,26 @@
     <sp_widget action="INSERT_OR_UPDATE">
         <category>custom</category>
         <client_script><![CDATA[function() {
-  /* widget controller */
-  var c = this;
+	/* widget controller */
+	var c = this;
+	// Use a position indicator to know which record to update
+	c.notePos = 0;
+
 	c.selectItem = function(idx){
 		var id = c.data.notes[idx].sys_id;
 		console.log('Note ID: ' +id);
 		$rootScope.noteID = id;
 		$rootScope.$emit('selectNote',id);
-		
+
 	}
+	// Subscribe to event.  Set the new title and note values on the 
+	// c.data object
+	$rootScope.$on('updateTitle', function(event,data) { 
+		console.log("updateTitle event received: " + event);
+		console.log(data);
+		c.data.notes[c.notePos].title = data.title;
+		c.data.notes[c.notePos].note = data.note;
+	});
 }]]></client_script>
         <controller_as>c</controller_as>
         <css/>
@@ -28,51 +39,51 @@
         <public>false</public>
         <roles/>
         <script><![CDATA[(function() {
-//create an array to populate with notes
-data.notes = [];
-var noteGR = new GlideRecord('x_snc_createnotes_note');
-noteGR.addQuery('user', gs.getUser().getID());
-noteGR.orderByDesc('sys_created_on');
-noteGR.query();
-while (noteGR.next()) {
-var noteObj = {};
-//use service portal helper method to get some display values
-$sp.getRecordDisplayValues(noteObj, noteGR, 'number,title,sys_id');
-//get the first 20 characters of the description
-noteObj.note = noteGR.getValue('note').slice(0,20);
-//push the populated obj into the array
-data.notes.push(noteObj);
-}
+	//create an array to populate with notes
+	data.notes = [];
+	var noteGR = new GlideRecord('x_snc_createnotes_note');
+	noteGR.addQuery('user', gs.getUser().getID());
+	noteGR.orderByDesc('sys_created_on');
+	noteGR.query();
+	while (noteGR.next()) {
+		var noteObj = {};
+		//use service portal helper method to get some display values
+		$sp.getRecordDisplayValues(noteObj, noteGR, 'number,title,sys_id');
+		//get the first 20 characters of the description
+		noteObj.note = noteGR.getValue('note').slice(0,20);
+		//push the populated obj into the array
+		data.notes.push(noteObj);
+	}
 })();]]></script>
         <servicenow>false</servicenow>
         <sys_class_name>sp_widget</sys_class_name>
         <sys_created_by>tricia.lynch</sys_created_by>
         <sys_created_on>2020-03-28 19:19:36</sys_created_on>
         <sys_id>6a8d6f4adbfbc81058cd7b823996193b</sys_id>
-        <sys_mod_count>15</sys_mod_count>
+        <sys_mod_count>18</sys_mod_count>
         <sys_name>Notes List</sys_name>
         <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
         <sys_update_name>sp_widget_6a8d6f4adbfbc81058cd7b823996193b</sys_update_name>
         <sys_updated_by>tricia.lynch</sys_updated_by>
-        <sys_updated_on>2020-03-28 19:50:29</sys_updated_on>
+        <sys_updated_on>2020-03-28 20:29:07</sys_updated_on>
         <template><![CDATA[<div class="panel panel-default">
-<div class="panel-heading clearfix">
-<h3 class="panel-title pull-left">
-${Notes}
-</h3>
-</div>
-<div class="list-group">
-<a class="list-group-item" ng-click="c.selectItem($index)"ng-repeat="note in data.notes">
-<h4 class="list-group-item-heading">
-{{::note.title}}
-</h4>
-<p class="list-group-item-text">
-{{::note.note}}
-</p>
-</a>
-</div>
+  <div class="panel-heading clearfix">
+    <h3 class="panel-title pull-left">
+      ${Notes}
+    </h3>
+  </div>
+  <div class="list-group">
+    <a class="list-group-item" ng-click="c.selectItem($index)"ng-repeat="note in data.notes">
+      <h4 class="list-group-item-heading">
+        {{::note.title}}
+      </h4>
+      <p class="list-group-item-text">
+        {{::note.note}}
+      </p>
+    </a>
+  </div>
 </div>
 ]]></template>
     </sp_widget>
